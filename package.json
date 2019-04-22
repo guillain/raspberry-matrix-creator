@@ -1,0 +1,22 @@
+{
+  "name": "my-matrix-js",
+  "version": "1.0.0",
+  "description": "test of matrix with js",
+  "main": "everloop.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "guillain",
+  "license": "ISC",
+  "dependencies": {
+    "matrix-protos": "0.0.27",
+    "pico-speaker": "0.0.7",
+    "pocketsphinx-continuous": "^1.1.0",
+    "pocketsphinx.js": "^1.0.0",
+    "zeromq": "^5.1.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "matrix"
+  ]
+}
