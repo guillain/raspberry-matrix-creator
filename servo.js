@@ -1,11 +1,11 @@
-// Load the Matrix Creator library
-var matrix_object = require('object');
+// Load the Matrix Creator object
+const MatrixCreator = require('./matrix_creator.js');
 
-// Initialize the class
-var app = matrix_object('127.0.0.1', 20045);
+// Instance the object
+let app = new MatrixCreator('127.0.0.1', 20045);
 
 // Create driver configuration
-var config = app.matrix_io.malos.v1.driver.DriverConfig.create({
+const config = app.matrix_io.malos.v1.driver.DriverConfig.create({
   // Create servo configuration
   servo: app.matrix_io.malos.v1.io.ServoParams.create({
     pin: 0,// Use pin 0
@@ -21,7 +21,7 @@ app.set_interval(1, function(){
   console.log("set_interval");
   
   // Pick number from 1-180
-  var angle = Math.floor(Math.random() * 180)+1;
+  const angle = Math.floor(Math.random() * 180)+1;
   // Set number as new random angle
   config.servo.angle = angle;
   // Log angle

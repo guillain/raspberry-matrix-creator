@@ -1,19 +1,19 @@
-// Load the Matrix Creator library
-var matrix_object = require('object');
+// Load the Matrix Creator object
+const MatrixCreator = require('./matrix_creator.js');
 
-// Initialize the class
-var app = Wakework('127.0.0.1', 20023);
+// Instance the object
+let app = new MatrixCreator('127.0.0.1', 20023);
 
 // Set Initial Variables
 const LM_PATH = '2584.lm';// Language Model File
 const DIC_PATH = '2584.dic';// Dictation File
 
 // Create driver configuration
-const config = this.matrix_io.malos.v1.driver.DriverConfig.create({ // Create & Set wakeword configurations
-    wakeword: this.matrix_io.malos.v1.io.WakeWordParams.create({
+const config = matrix_io.malos.v1.driver.DriverConfig.create({ // Create & Set wakeword configurations
+    wakeword: matrix_io.malos.v1.io.WakeWordParams.create({
         lmPath: LM_PATH,// Language model file path
         dicPath: DIC_PATH,// Dictation file path
-        channel: this.matrix_io.malos.v1.io.WakeWordParams.MicChannel.channel8,// Desired MATRIX microphone
+        channel: matrix_io.malos.v1.io.WakeWordParams.MicChannel.channel8,// Desired MATRIX microphone
         enableVerbose: false// Enable verbose option
     })
 });
@@ -32,7 +32,7 @@ class Wakework extends matrix_object {
         // super.port_data_update();
         
         // Create a Subscriber socket
-        this.updateSocket = this.zmq.socket('sub');
+        this.updateSocket = zmq.socket('sub');
         
         // Connect Subscriber to Data Update port
         this.updateSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 3));
@@ -43,7 +43,7 @@ class Wakework extends matrix_object {
         // On Message
         this.updateSocket.on('message', function (wakeword_buffer) {
             // Extract message
-            var wakeWordData = this.matrix_io.malos.v1.io.WakeWordParams.decode(wakeword_buffer);
+            var wakeWordData = matrix_io.malos.v1.io.WakeWordParams.decode(wakeword_buffer);
             
             // Log message
             console.log("port_data_update: " + wakeWordData);

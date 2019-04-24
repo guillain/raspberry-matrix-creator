@@ -1,8 +1,8 @@
-// Load the Matrix Creator library
-var matrix_object = require('object');
+// Load the Matrix Creator object
+const MatrixCreator = require('./matrix_creator.js');
 
-// Initialize the class
-var app = App('127.0.0.1', 20021);
+// Instance the object
+let app = new MatrixCreator('127.0.0.1', 20021);
 
 // Initialise the port connection
 app.port_init();
@@ -12,13 +12,13 @@ class App extends matrix_object {
     port_base(config) {
         console.log("port_base");
         
-        this.configSocket = this.zmq.socket('push');// Create a Pusher socket
+        this.configSocket = zmq.socket('push');// Create a Pusher socket
         this.configSocket.connect('tcp://' + this.matrix_ip + ':' + this.matrix_port);// Connect Pusher to Base port
         
         // Loop every 50 milliseconds
         this.set_interval(this.keepAlivePing, function () {
             // Create an empty Everloop image
-            var image = this.matrix_io.malos.v1.io.EverloopImage.create();
+            var image = matrix_io.malos.v1.io.EverloopImage.create();
             
             // For each device LED
             for (var i = 0; i < this.matrix_device_leds; ++i) {
@@ -32,11 +32,11 @@ class App extends matrix_object {
             }
         
             // Store the Everloop image in MATRIX configuration
-            var config = this.matrix_io.malos.v1.driver.DriverConfig.create({'image': image});
+            var config = matrix_io.malos.v1.driver.DriverConfig.create({'image': image});
         
             // Send MATRIX configuration to MATRIX device
             if (this.matrix_device_leds > 0)
-                this.configSocket.send(this.matrix_io.malos.v1.driver.DriverConfig.encode(config).finish());
+                this.configSocket.send(matrix_io.malos.v1.driver.DriverConfig.encode(config).finish());
         
         });
     }

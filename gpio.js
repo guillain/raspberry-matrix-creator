@@ -1,9 +1,10 @@
-// Load the Matrix Creator library
-var matrix_object = require('object');
+// Load the Matrix Creator object
+const MatrixCreator = require('./matrix_creator.js');
 
-// Initialize the class
+// Instance the object
+let app = new MatrixCreator('127.0.0.1', 20049);
+
 var counter = 1;// Counter for gpio value toggle
-var app = GPIO('127.0.0.1', 20049);
 
 // Initialise the port connection
 app.port_init();
@@ -29,21 +30,21 @@ class GPIO extends matrix_object {
         console.log("port_base");
         
         // Create a Pusher socket
-        this.configSocket = this.zmq.socket('push');
+        this.configSocket = zmq.socket('push');
         
         // Connect Pusher to Base port
         this.configSocket.connect('tcp://' + this.matrix_ip + ':' + this.matrix_port);
         
         //Create driver configuration
-        var outputConfig = this.matrix_io.malos.v1.driver.DriverConfig.create({
+        var outputConfig = matrix_io.malos.v1.driver.DriverConfig.create({
             // Update rate configuration
             delayBetweenUpdates: this.delayBetweenUpdates,// 2 seconds between updates
             timeoutAfterLastPing: this.timeoutAfterLastPing,// Stop sending updates 6 seconds after pings.
             
             //GPIO Configuration
-            gpio: this.matrix_io.malos.v1.io.GpioParams.create({
+            gpio: matrix_io.malos.v1.io.GpioParams.create({
                 pin: 0,// Use pin 0
-                mode: this.matrix_io.malos.v1.io.GpioParams.EnumMode.OUTPUT,// Set as output mode
+                mode: matrix_io.malos.v1.io.GpioParams.EnumMode.OUTPUT,// Set as output mode
                 value: 0// Set initial pin value as off
             })
         });
@@ -53,7 +54,7 @@ class GPIO extends matrix_object {
             outputConfig.gpio.value = counter % 2;// Set pin value as 1 or 0
             counter++;// increase counter
             // Send MATRIX configuration to MATRIX device
-            this.configSocket.send(this.matrix_io.malos.v1.driver.DriverConfig.encode(outputConfig).finish());
+            this.configSocket.send(matrix_io.malos.v1.driver.DriverConfig.encode(outputConfig).finish());
         }
     }
 }

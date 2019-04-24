@@ -1,8 +1,8 @@
-// Load the Matrix Creator library
-var matrix_object = require('object');
+// Load the Matrix Creator object
+const MatrixCreator = require('./matrix_creator.js');
 
-// Initialize the class
-var app = Everloop('127.0.0.1', 20021);
+// Instance the object
+let app = new MatrixCreator('127.0.0.1', 20021);
 
 // Initialise the port connection
 app.port_init();
@@ -13,13 +13,13 @@ class Everloop extends matrix_object {
         console.log("port_base");
         
         // Create a Pusher socket
-        this.configSocket = this.zmq.socket('push');
+        this.configSocket = zmq.socket('push');
         
         // Connect Pusher to Base Port
         this.configSocket.connect('tcp://' + this.matrix_ip + ':' + this.matrix_port);
         
         // Create an empty Everloop image
-        var image = this.matrix_io.malos.v1.io.EverloopImage.create();
+        let image = matrix_io.malos.v1.io.EverloopImage.create();
         
         // Loop every 50 milliseconds
         this.set_interval(0.05, function () {
@@ -35,13 +35,13 @@ class Everloop extends matrix_object {
             }
             
             // Store the Everloop image in driver configuration
-            var config = this.matrix_io.malos.v1.driver.DriverConfig.create({
+            const config = matrix_io.malos.v1.driver.DriverConfig.create({
                 'image': image
             });
             
             // Send driver configuration to MATRIX device
             if (this.matrix_device_leds > 0)
-                this.configSocket.send(this.matrix_io.malos.v1.driver.DriverConfig.encode(config).finish());
+                this.configSocket.send(matrix_io.malos.v1.driver.DriverConfig.encode(config).finish());
         });
     }
     
@@ -49,7 +49,7 @@ class Everloop extends matrix_object {
         console.log("port_keep_alive");
         
         // Create a Pusher socket
-        this.pingSocket = this.zmq.socket('push');
+        this.pingSocket = zmq.socket('push');
         
         // Connect Pusher to Keep-alive port
         this.pingSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 1));
