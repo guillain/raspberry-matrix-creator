@@ -8,4 +8,5 @@ let app = new MatrixCreator('127.0.0.1', 20029);
 app.port_init();
 
 // Get and display the result
-console.log("UV result: " + app.port_data_update('sense', 'UV'));
+app.port_data_update('sense', 'UV');
+

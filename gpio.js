@@ -1,33 +1,13 @@
+const zmq = require('zeromq');// Asynchronous Messaging Framework
+const matrix_io = require('matrix-protos').matrix_io;// Protocol Buffers for MATRIX function
+
 // Load the Matrix Creator object
 const MatrixCreator = require('./matrix_creator.js');
 
-// Instance the object
-let app = new MatrixCreator('127.0.0.1', 20049);
-
-var counter = 1;// Counter for gpio value toggle
-
-// Initialise the port connection
-app.port_init();
-
-// Extract message
-var data = app.port_data_update('GpioParams');
-// String value to represent all GPIO pins as off
-var zeroPadding = '0000000000000000';
-// Remove padding to make room for GPIO values
-var gpioValues = zeroPadding.slice(0, zeroPadding.length - data.values.toString(2).length);
-// Convert GPIO values to 16-bit and add to string
-gpioValues = gpioValues.concat(data.values.toString(2));
-// Convert string to chronologically ordered array
-gpioValues = gpioValues.split("").reverse();
-
-// Log GPIO pin states from gpioValues[0-15]
-console.log('GPIO PINS-->[0-15]\n' + '[' + gpioValues.toString() + ']');
-console.log("GPIO result: " + app.port_data_update('EverloopImage'));
-
-
-class GPIO extends matrix_object {
+// GPIO class overloadd MatrixCreator
+class GPIO extends MatrixCreator {
     port_base(config) {
-        console.log("port_base");
+        console.log("port_base config:" + config);
         
         // Create a Pusher socket
         this.configSocket = zmq.socket('push');
@@ -57,4 +37,43 @@ class GPIO extends matrix_object {
             this.configSocket.send(matrix_io.malos.v1.driver.DriverConfig.encode(outputConfig).finish());
         }
     }
+
+    port_data_update(){
+        this.updateSocket = zmq.socket('sub');
+
+        // Connect Subscriber to Data Update port
+        this.updateSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 3));
+
+        // Subscribe to messages
+        this.updateSocket.subscribe('');
+
+        // On Message
+        this.updateSocket.on('message', function(buffer){
+            // Extract message
+            var data = matrix_io.malos.v1.io.GpioParams.decode(buffer);
+
+            // String value to represent all GPIO pins as off
+            var zeroPadding = '0000000000000000';
+
+            // Remove padding to make room for GPIO values
+            var gpioValues = zeroPadding.slice(0, zeroPadding.length - data.values.toString(2).length);
+
+            // Convert GPIO values to 16-bit and add to string
+            gpioValues = gpioValues.concat(data.values.toString(2));
+
+            // Convert string to chronologically ordered array
+            gpioValues = gpioValues.split("").reverse();
+
+            // Log GPIO pin states from gpioValues[0-15]
+            console.log('GPIO PINS-->[0-15]\n'+'['+gpioValues.toString()+']');
+        });
+                                                 
+   }
 }
+
+// Instance the object
+let app = new GPIO('127.0.0.1', 20049);
+
+// Log GPIO pin states from gpioValues[0-15]
+app.port_data_update();
+

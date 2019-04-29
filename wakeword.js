@@ -1,12 +1,12 @@
+const zmq = require('zeromq');// Asynchronous Messaging Framework
+const matrix_io = require('matrix-protos').matrix_io;// MATRIX Protocol Buffers
+
 // Load the Matrix Creator object
 const MatrixCreator = require('./matrix_creator.js');
 
-// Instance the object
-let app = new MatrixCreator('127.0.0.1', 20023);
-
 // Set Initial Variables
-const LM_PATH = '2584.lm';// Language Model File
-const DIC_PATH = '2584.dic';// Dictation File
+const LM_PATH = 'assets/2584.lm';// Language Model File
+const DIC_PATH = 'assets/2584.dic';// Dictation File
 
 // Create driver configuration
 const config = matrix_io.malos.v1.driver.DriverConfig.create({ // Create & Set wakeword configurations
@@ -18,14 +18,8 @@ const config = matrix_io.malos.v1.driver.DriverConfig.create({ // Create & Set w
     })
 });
 
-// Initialise the port connection
-app.port_init(config);
-
-// Send port update
-app.port_data_update();
-
 // Wakerwork class overload the matrix object
-class Wakework extends matrix_object {
+class Wakework extends MatrixCreator {
     port_data_update() {
         console.log("port_data_update");
         
@@ -46,7 +40,7 @@ class Wakework extends matrix_object {
             var wakeWordData = matrix_io.malos.v1.io.WakeWordParams.decode(wakeword_buffer);
             
             // Log message
-            console.log("port_data_update: " + wakeWordData);
+            console.log("port_data_update wakeWordData:%j", wakeWordData);
             
             // Run actions based on the phrase heard
             switch (wakeWordData.wakeWord) {
@@ -62,3 +56,12 @@ class Wakework extends matrix_object {
         });
     }
 }
+// Instance the object
+let app = new Wakework('127.0.0.1', 60001);
+
+// Initialise the port connection
+app.port_init(config);
+
+// Send port update
+app.port_data_update();
+
