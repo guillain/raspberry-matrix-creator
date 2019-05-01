@@ -30,7 +30,8 @@ class Wakework extends MatrixCreator {
             var wakeWordData = matrix_io.malos.v1.io.WakeWordParams.decode(wakeword_buffer);
             
             // Log message
-            console.log("port_data_update wakeWordData:%j", wakeWordData);
+            // console.log("port_data_update wakeword_buffer:%j", wakeword_buffer);
+            console.log("port_data_update wakeWordData:%s", wakeWordData.wakeWord);
             
             // Run actions based on the phrase heard
             switch (wakeWordData.wakeWord) {
