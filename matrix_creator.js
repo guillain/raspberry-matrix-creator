@@ -39,15 +39,30 @@ class MatrixCreator {
         this.port_error();
     }
     
+    // Type: sub, push
+    port_connect(ip, port, type){
+        console.log("port_connect ip:%s port:%d type:%s", ip, port, type);
+
+        // Create a socket with the requsted type
+        let socket = this.zmq.socket(type);
+
+        // Connect the port
+        socket.connect('tcp://' + ip + ':' + port);
+
+        // if 'type' == Subscribe => Connect Subscriber to the port
+        if (type == 'sub')
+            socket.subscribe('');
+
+        // Return the connected port/socket
+        return socket;
+    } 
+
     port_base(config) {
         console.log("port_base config:%j", config);
 
-        // Create a Pusher socket
-        this.configSocket = this.zmq.socket('push');
-        
-        // Connect Pusher to Base port
-        this.configSocket.connect('tcp://' + this.matrix_ip + ':' + this.matrix_port);
-        
+        // Create and connect a Pusher socket
+        this.configSocket = this.port_connect(this.matrix_ip, this.matrix_port, 'push');
+
         // Send driver configuration
         this.configSocket.send(
             this.matrix_io.malos.v1.driver.DriverConfig.encode(config).finish()
@@ -57,12 +72,9 @@ class MatrixCreator {
     port_keep_alive() {
         console.log("port_keep_alive");
 
-        // Create a Pusher socket
-        this.pingSocket = this.zmq.socket('push');
-        
-        // Connect Pusher to Keep-alive port
-        this.pingSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 1));
-        
+        // Create and connect a Pusher socket
+        this.pingSocket = this.port_connect(this.matrix_ip, this.matrix_port + 1, 'push');
+
         // Send initial ping
         this.pingSocket.send('');
         
@@ -73,15 +85,9 @@ class MatrixCreator {
     port_error() {
         console.log("port_error");
 
-        // Create a Subscriber socket
-        this.errorSocket = this.zmq.socket('sub');
-        
-        // Connect Subscriber to Error port
-        this.errorSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 2));
-        
-        // Connect Subscriber to Error port
-        this.errorSocket.subscribe('');
-        
+        // Create and connect a Subscriber socket
+        this.errorSocket =  this.port_connect(this.matrix_ip, this.matrix_port + 2, 'sub');
+
         // On Message
         this.errorSocket.on('message', function (error_message) {
             console.log('port_error: ' + error_message.toString('utf8'));// Log error
@@ -89,17 +95,11 @@ class MatrixCreator {
     }
     
     port_data_update(type, element) {
-        console.log("port_data_update type:" + type + " element:" + element);
+        console.log("port_data_update type:%s element:%s", type, element);
 
-        // Create a Subscriber socket
-        this.updateSocket = this.zmq.socket('sub');
-        
-        // Connect Subscriber to Data Update port
-        this.updateSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 3));
-        
-        // Subscribe to messages
-        this.updateSocket.subscribe('');
-        
+        // Create and connect a Subscriber socket
+        this.updateSocket = this.port_connect(this.matrix_ip, this.matrix_port + 3, 'sub');
+
         // On Message
         this.updateSocket.on('message', function (buffer) {
             let data = matrix_io.malos.v1[type][element].decode(buffer);// Extract message

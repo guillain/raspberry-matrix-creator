@@ -3,62 +3,68 @@ const matrix_io = require('matrix-protos').matrix_io;// Protocol Buffers for MAT
 // Load the Matrix Creator object
 const MatrixCreator = require('./matrix_creator.js');
 
+// Holds amount of LEDs on MATRIX device
+let matrix_device_leds = 0;
+
 // Everloop class overload the matrix object
 class Everloop extends MatrixCreator {
     port_base(config) {
-        console.log("port_base config:" + config);
+        console.log("port_base config:%j", config);
         
         // Create a Pusher socket
-        this.configSocket = this.zmq.socket('push');
-        
-        // Connect Pusher to Base Port
-        this.configSocket.connect('tcp://' + this.matrix_ip + ':' + this.matrix_port);
-        
+        let configSocket = this.port_connect(this.matrix_ip, this.matrix_port, 'push');
+
         // Create an empty Everloop image
         var image = matrix_io.malos.v1.io.EverloopImage.create();
-        
+
+        console.log('matrix_device_leds '+matrix_device_leds);
+
         // Loop every 50 milliseconds
-        this.set_interval(0.05, function () {
+        setInterval(function(){
             // For each device LED
             for (var i = 0; i < matrix_device_leds; ++i) {
                 // Set individual LED value
                 image.led[i] = {
-                    red: Math.floor(Math.random() * 200) + 1,
-                    green: Math.floor(Math.random() * 255) + 1,
-                    blue: Math.floor(Math.random() * 50) + 1,
+                    red: Math.floor(Math.random() * 200)+1,
+                    green: Math.floor(Math.random() * 255)+1,
+                    blue: Math.floor(Math.random() * 50)+1,
                     white: 0
                 };
             }
-            
+
             // Store the Everloop image in driver configuration
             var config = matrix_io.malos.v1.driver.DriverConfig.create({
                 'image': image
             });
-            
+
             // Send driver configuration to MATRIX device
-            if (this.matrix_device_leds > 0) {
-                this.configSocket.send(matrix_io.malos.v1.driver.DriverConfig.encode(config).finish());
+            if(matrix_device_leds > 0){
+                console.log('setInterval config:%j', config);
+                configSocket.send(matrix_io.malos.v1.driver.DriverConfig.encode(config).finish());
             }
-        });
+        },500);
     }
-    
-    port_keep_alive() {
-        console.log("port_keep_alive");
-        
-        // Create a Pusher socket
-        this.pingSocket = this.zmq.socket('push');
-        
-        // Connect Pusher to Keep-alive port
-        this.pingSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 1));
-        
-        // Send initial ping
-        this.pingSocket.send('');
+
+    port_data_update(type, element) {
+        console.log("port_data_update type:%s element:%s", type, element);
+
+        // Create a Subscriber socket
+        this.updateSocket = this.port_connect(this.matrix_ip, this.matrix_port + 3, 'sub');
+
+        // On Message
+        this.updateSocket.on('message', function(buffer){
+            let data = matrix_io.malos.v1.io.EverloopImage.decode(buffer);// Extract message
+            matrix_device_leds = data.everloopLength;// Save MATRIX device LED count
+        });
     }
 }
 
 // Instance the object
-let app = new MatrixCreator('127.0.0.1', 20021);
+let app = new Everloop('127.0.0.1', 20021);
 
 // Initialise the port connection
 app.port_init();
+
+// Get data update
+app.port_data_update('io','EverloopImage');
 

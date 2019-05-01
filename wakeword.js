@@ -20,19 +20,9 @@ const config = matrix_io.malos.v1.driver.DriverConfig.create({ // Create & Set w
 
 // Wakerwork class overload the matrix object
 class Wakework extends MatrixCreator {
-    port_data_update() {
-        console.log("port_data_update");
-        
-        // super.port_data_update();
-        
-        // Create a Subscriber socket
-        this.updateSocket = zmq.socket('sub');
-        
-        // Connect Subscriber to Data Update port
-        this.updateSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 3));
-        
-        // Subscribe to messages
-        this.updateSocket.subscribe('');
+    port_data_update(type, element) {
+        // Create and connect a Subscriber socket
+        this.updateSocket = this.port_connect(this.matrix_ip, this.matrix_port + 3, 'sub');
         
         // On Message
         this.updateSocket.on('message', function (wakeword_buffer) {
@@ -63,5 +53,5 @@ let app = new Wakework('127.0.0.1', 60001);
 app.port_init(config);
 
 // Send port update
-app.port_data_update();
+app.port_data_update('io','WakeWordParams');
 

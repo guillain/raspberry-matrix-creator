@@ -7,13 +7,8 @@ const matrix_io = require('matrix-protos').matrix_io;// Protocol Buffers for MAT
 // Pressure class overload the matrix object
 class Pressure extends MatrixCreator {
     port_data_update() {
-        this.updateSocket = this.zmq.socket('sub');
-
-        // Connect Subscriber to Data Update port
-        this.updateSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 3));
-
-        // Subscribe to messages
-        this.updateSocket.subscribe('');
+        // Create and connect Subscriber to Data Update port
+        this.updateSocket = this.port_connect(this.matrix_ip, this.matrix_port + 3, 'sub');
 
         // On Message
         this.updateSocket.on('message', function (buffer) {

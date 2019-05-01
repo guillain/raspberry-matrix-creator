@@ -9,12 +9,9 @@ class GPIO extends MatrixCreator {
     port_base(config) {
         console.log("port_base config:" + config);
         
-        // Create a Pusher socket
-        this.configSocket = zmq.socket('push');
-        
-        // Connect Pusher to Base port
-        this.configSocket.connect('tcp://' + this.matrix_ip + ':' + this.matrix_port);
-        
+        // Create and connect a Pusher socket
+        this.configSocket = this.port_connect(this.matrix_ip, this.matrix_port, 'push');
+
         //Create driver configuration
         var outputConfig = matrix_io.malos.v1.driver.DriverConfig.create({
             // Update rate configuration
@@ -39,13 +36,8 @@ class GPIO extends MatrixCreator {
     }
 
     port_data_update(){
-        this.updateSocket = zmq.socket('sub');
-
-        // Connect Subscriber to Data Update port
-        this.updateSocket.connect('tcp://' + this.matrix_ip + ':' + (this.matrix_port + 3));
-
-        // Subscribe to messages
-        this.updateSocket.subscribe('');
+        // Create and connect a Subscriber socket
+        this.updateSocket = this.port_connect(this.matrix_ip, this.matrix_port + 3, 'sub');
 
         // On Message
         this.updateSocket.on('message', function(buffer){
