@@ -13,7 +13,7 @@ class Pressure extends MatrixCreator {
         // On Message
         this.updateSocket.on('message', function (buffer) {
             var data = matrix_io.malos.v1.sense.Pressure.decode(buffer);// Extract message
-            console.log("port_data_update: %j", data);// Log new pressure data
+            console.log("port_data_update=%j", data);// Log new pressure data
         });
     }
 }

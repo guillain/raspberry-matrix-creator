@@ -16,6 +16,12 @@ class MatrixCreator {
         this.zmq = zmq; // Asynchronous Messaging Framework
         this.matrix_io = matrix_io;// Protocol Buffers for MATRIX function
 
+        this.c_red = { red:255, green:0, blue:0, white:0 };
+        this.c_green = { red:0, green:255, blue:0, white:0 };
+        this.c_blue = { red:0, green:0, blue:255, white:0 };
+        this.c_white = { red:0, green:0, blue:0, white:255 };
+        this.c_black = { black:0 };
+
         if (config != '') this.port_init(config); // Port initialisation if the config is provided
 
         // Update data on port if the type and element are provided
@@ -103,7 +109,7 @@ class MatrixCreator {
         // On Message
         this.updateSocket.on('message', function (buffer) {
             let data = matrix_io.malos.v1[type][element].decode(buffer);// Extract message
-            console.log("port_data_update: %j", data);// Log new data
+            console.log("port_data_update=%j", data);// Log new data
         });
     }
     
