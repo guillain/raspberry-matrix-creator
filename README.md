@@ -22,6 +22,23 @@ npm install
 ```
 
 # Example
+You cna use the main to orchestrate the execution by a remote tools or directly by executing the node script.
+
+## Main
+### One shot execution (ie get sensor value)
+```
+../main humidity
+cat /tmp/matrix_humidity.sig
+```
+
+### Looping mode - as node daemon (ie light dance)
+```
+../main everloop loop
+sleep 10
+../main everloop # to stop the run
+../main black # to stop the light
+```
+
 ## Humidity
 ```
 node humidity.js
@@ -37,4 +54,5 @@ node imu.js
 node pressure.js
 [Ctrl+C]
 ```
+
 
